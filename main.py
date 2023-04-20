@@ -252,7 +252,7 @@ def adiciona_senha():
 
 def janela_principal():
     
-    fh.decrypt_file()
+    #fh.decrypt_file()
 
     # chama a variavel global de lista
     global lista, lista_busca, lista_para_mostrar, lista_para_buscar
@@ -362,7 +362,7 @@ def janela_principal():
                 janela['-LISTBOX-'].update(lista_para_buscar)
                 na_busca = True
 
-    fh.encrypt_file()
+    #fh.encrypt_file()
 
     # fecha a janela
     janela.close()
