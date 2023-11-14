@@ -1,17 +1,20 @@
 import os
 import csv
 import PySimpleGUI as sg
-import file_handle as fh
+from datetime import datetime
 
 
 lista = []
 lista_busca = []
 lista_para_mostrar = []
 lista_para_buscar = []
+tema_geral = 'Reddit'
+versao_app = '2.0'
+github_user = 'MatPicolli'
 
 
 def verifica_senha_mestre(senha_escrita):
-    if senha_escrita == '1969':
+    if senha_escrita == 'mateus124':
         return True
     else:
         return False
@@ -32,7 +35,7 @@ def atualiza_lista_busca():
     lista_para_buscar = []
     # atualiza a lista de senhas
     for linha in range(len(lista_busca)):
-        lista_para_buscar.append(lista_busca[linha][0])
+        lista_para_buscar.append(f'{lista_busca[linha][0]}')
 
 
 def atualiza_lista():
@@ -42,7 +45,7 @@ def atualiza_lista():
     with open('senhas.csv', 'r') as f:
         lista = list(csv.reader(f))
         for linha in range(len(lista)):
-            lista_para_mostrar.append(lista[linha][0])
+            lista_para_mostrar.append(f'  {lista[linha][0]}')
         f.close()
 
 
@@ -66,7 +69,7 @@ def salva_senha(dados):
 
 def confirma_acao():
     # tema e fonte
-    sg.theme('DarkBrown6')
+    sg.theme(tema_geral)
     sg.set_options(font=('Roboto', 11))
 
     # layout da janela
@@ -100,7 +103,7 @@ def confirma_acao():
 
 def visualiza_senha_busca(index):
     # tema e fonte
-    sg.theme('DarkBrown6')
+    sg.theme(tema_geral)
     sg.set_options(font=('Roboto', 11))
 
     # layout da janela
@@ -109,8 +112,7 @@ def visualiza_senha_busca(index):
         [sg.Text('Usuário', size=(8, 1)), sg.InputText(lista_busca[index][1], disabled=True, size=(20, 1), key='-USER-')],
         [sg.Text('Senha', size=(8, 1)), sg.InputText(lista_busca[index][2], disabled=True, size=(20, 1), key='-PASS-')],
         [sg.Text('E-mail', size=(8, 1)), sg.InputText(lista_busca[index][3], disabled=True, size=(20, 1), key='-EMAIL-')],
-        [sg.Text('Adicional 1', size=(8, 1)), sg.InputText(lista_busca[index][4], disabled=True, size=(20, 1), key='-ADD1-')],
-        [sg.Text('Adicional 2', size=(8, 1)), sg.InputText(lista_busca[index][5], disabled=True, size=(20, 1), key='-ADD2-')]
+        [sg.Text('Adicional', size=(8, 1)), sg.Multiline(lista_busca[index][4], disabled=True, size=(25, 8), key='-ADD-')],
     ]
 
     # cria janela
@@ -129,17 +131,16 @@ def visualiza_senha_busca(index):
 
 def visualisa_senha(index):
     # tema e fonte
-    sg.theme('DarkBrown6')
+    sg.theme(tema_geral)
     sg.set_options(font=('Roboto', 11))
 
     # layout da janela
     layout = [
-        [sg.Text('Index *', size=(8, 1)), sg.InputText(lista[index][0], disabled=True, size=(20, 1), key='-INDEX-')],
-        [sg.Text('Usuário', size=(8, 1)), sg.InputText(lista[index][1], disabled=True, size=(20, 1), key='-USER-')],
-        [sg.Text('Senha', size=(8, 1)), sg.InputText(lista[index][2], disabled=True, size=(20, 1), key='-PASS-')],
-        [sg.Text('E-mail', size=(8, 1)), sg.InputText(lista[index][3], disabled=True, size=(20, 1), key='-EMAIL-')],
-        [sg.Text('Adicional 1', size=(8, 1)), sg.InputText(lista[index][4], disabled=True, size=(20, 1), key='-ADD1-')],
-        [sg.Text('Adicional 2', size=(8, 1)), sg.InputText(lista[index][5], disabled=True, size=(20, 1), key='-ADD2-')]
+        [sg.Text('Index *', size=(8, 1)), sg.InputText(lista[index][0], disabled=True, size=(25, 1), key='-INDEX-')],
+        [sg.Text('Usuário', size=(8, 1)), sg.InputText(lista[index][1], disabled=True, size=(25, 1), key='-USER-')],
+        [sg.Text('Senha', size=(8, 1)), sg.InputText(lista[index][2], disabled=True, size=(25, 1), key='-PASS-')],
+        [sg.Text('E-mail', size=(8, 1)), sg.InputText(lista[index][3], disabled=True, size=(25, 1), key='-EMAIL-')],
+        [sg.Text('Adicional', size=(8, 1)), sg.Multiline(lista[index][4], disabled=True, size=(25, 8), key='-ADD-')],
     ]
 
     # cria janela
@@ -156,19 +157,25 @@ def visualisa_senha(index):
     janela.close()
 
 
-def modifica_senha(index):
+def modifica_senha(index, buscando=False):
     # tema e fonte
-    sg.theme('DarkBrown6')
+    sg.theme(tema_geral)
     sg.set_options(font=('Roboto', 11))
+
+    if buscando:
+        for linha in range(0, len(lista)):
+            for coluna in range(0, len(lista)):
+                if str(index) == lista[linha][0]:
+                    index = linha
+                    index = linha
 
     # layout da janela
     layout = [
-        [sg.Text('Index *', size=(8, 1)), sg.InputText(lista[index][0], disabled=True, size=(20, 1), key='-INDEX-')],
-        [sg.Text('Usuário', size=(8, 1)), sg.InputText(lista[index][1], size=(20, 1), key='-USER-')],
-        [sg.Text('Senha', size=(8, 1)), sg.InputText(lista[index][2], size=(20, 1), key='-PASS-')],
-        [sg.Text('E-mail', size=(8, 1)), sg.InputText(lista[index][3], size=(20, 1), key='-EMAIL-')],
-        [sg.Text('Adicional 1', size=(8, 1)), sg.InputText(lista[index][4], size=(20, 1), key='-ADD1-')],
-        [sg.Text('Adicional 2', size=(8, 1)), sg.InputText(lista[index][5], size=(20, 1), key='-ADD2-')],
+        [sg.Text('Index *', size=(8, 1)), sg.InputText(lista[index][0], disabled=True, size=(25, 1), key='-INDEX-')],
+        [sg.Text('Usuário', size=(8, 1)), sg.InputText(lista[index][1], size=(25, 1), key='-USER-')],
+        [sg.Text('Senha', size=(8, 1)), sg.InputText(lista[index][2], size=(25, 1), key='-PASS-')],
+        [sg.Text('E-mail', size=(8, 1)), sg.InputText(lista[index][3], size=(25, 1), key='-EMAIL-')],
+        [sg.Text('Adicional', size=(8, 1)), sg.Multiline(lista[index][4], size=(25, 8), key='-ADD-')],
         [sg.Button('Salvar', button_color=('white', 'green'), size=(13, 1), key='-SALVAR-'),
          sg.Button('Deletar', button_color=('white', 'red'), size=(12, 1), key='-DELETAR-')]
     ]
@@ -186,7 +193,7 @@ def modifica_senha(index):
         # caso clique no botão de salvar
         elif eventos == '-SALVAR-':
             dados = [valores['-INDEX-'], valores['-USER-'], valores['-PASS-'],
-                     valores['-EMAIL-'], valores['-ADD1-'], valores['-ADD2-']]
+                     valores['-EMAIL-'], valores['-ADD-']]
             deleta_senha(index)
             salva_senha(dados)
             break
@@ -205,18 +212,18 @@ def modifica_senha(index):
 
 def adiciona_senha():
     # tema e fonte
-    sg.theme('DarkBrown6')
+    sg.theme(tema_geral)
     sg.set_options(font=('Roboto', 11))
 
     # layout da janela
     layout = [
-        [sg.Text('Index *', size=(8, 1)), sg.InputText(size=(20, 1), key='-INDEX-')],
-        [sg.Text('Usuário', size=(8, 1)), sg.InputText(size=(20, 1), key='-USER-')],
-        [sg.Text('Senha', size=(8, 1)), sg.InputText(size=(20, 1), key='-PASS-')],
-        [sg.Text('E-mail', size=(8, 1)), sg.InputText(size=(20, 1), key='-EMAIL-')],
-        [sg.Text('Adicional 1', size=(8, 1)), sg.InputText(size=(20, 1), key='-ADD1-')],
-        [sg.Text('Adicional 2', size=(8, 1)), sg.InputText(size=(20, 1), key='-ADD2-')],
+        [sg.Text('Index *', size=(8, 1)), sg.InputText(size=(25, 1), key='-INDEX-')],
+        [sg.Text('Usuário', size=(8, 1)), sg.InputText(size=(25, 1), key='-USER-')],
+        [sg.Text('Senha', size=(8, 1)), sg.InputText(size=(25, 1), key='-PASS-')],
+        [sg.Text('E-mail', size=(8, 1)), sg.InputText(size=(25, 1), key='-EMAIL-')],
+        [sg.Text('Adicional', size=(8, 1)), sg.Multiline(size=(25, 8), key='-ADD-')],
         [sg.Button('Criar Senha', size=(19, 1)),
+         sg.Push(),
          sg.Button('❌', size=(6, 1), button_color=('red', sg.theme_button_color_background()))]
     ]
 
@@ -242,7 +249,7 @@ def adiciona_senha():
                 sg.Popup('Index existente!')
             else:
                 dados = [valores['-INDEX-'], valores['-USER-'], valores['-PASS-'],
-                         valores['-EMAIL-'], valores['-ADD1-'], valores['-ADD2-']]
+                         valores['-EMAIL-'], valores['-ADD-']]
                 salva_senha(dados)
                 break
 
@@ -267,7 +274,7 @@ def janela_principal():
     atualiza_lista()
 
     # tema e fonte
-    sg.theme('DarkBrown6')
+    sg.theme(tema_geral)
     sg.set_options(font=('Roboto', 11))
 
     layout = [
@@ -275,11 +282,11 @@ def janela_principal():
         [sg.Text('Buscar'), sg.InputText(size=(29, 1), key='-BUSCA-'), sg.Button('🔍')],
         [sg.Listbox(lista_para_mostrar, size=(40, 20), key='-LISTBOX-', enable_events=True, select_mode=sg.LISTBOX_SELECT_MODE_SINGLE)],
         [sg.Button('➕', size=(18, 1), key='-ADICIONAR-'), sg.Button('✏️', size=(17, 1), key='-MODIFICAR-')],
-        [sg.Text('© 2023 Picoword'), sg.Text('info@picoword.com', size=(24, 1), justification='right')],
+        [sg.Text(f'© {datetime.now().year} Picoword'), sg.Push(), sg.Text(f'↻ {github_user}')],
     ]
 
     # cria a janela
-    janela = sg.Window('PICOWORD v0.0.1 - Tela Principal', layout, finalize=True)
+    janela = sg.Window(f'PICOWORD v{versao_app} - Tela Principal', layout, finalize=True)
     janela['-LISTBOX-'].bind('<Double-Button-1>', '-DOUBLE-')
     janela['-BUSCA-'].bind('<Return>', '-ENTER-')
 
@@ -314,7 +321,22 @@ def janela_principal():
             if valores['-LISTBOX-']:
                 try:
                     if na_busca:
-                        sg.PopupOK('Não é possível modificar uma senha na busca!')
+                        # pega o nome completo do item selecionado
+                        index_selecionado = valores['-LISTBOX-'][0]
+                        # pega apenas os 4 primeiros caracteres do nome completo, que é o código do cliente
+                        modifica_senha(index_selecionado, True)
+
+                        atualiza_lista()
+
+                        busca = valores['-BUSCA-']
+
+                        lista_busca = list(filter(lambda cadastro: busca.lower() in cadastro[1].lower(), lista))
+
+                        # atualiza a lista_busca
+                        atualiza_lista_busca()
+                        # atualiza a Listbox com a lista filtrada
+                        janela['-LISTBOX-'].update(lista_para_buscar)
+                        na_busca = True
                     else:
                         # pega o index do item selecionado
                         index_selecionado = lista_para_mostrar.index(valores['-LISTBOX-'][0])
@@ -370,22 +392,23 @@ def janela_principal():
 
 def janela_de_login():
     # Tema e cor de fundo da janela
-    sg.theme('DarkBrown6')
+    sg.theme(tema_geral)
     sg.set_options(font=('Roboto', 11))
 
     # Layout da janela
     layout = [
         # Texto na esquerda e campo de entrada na direita (senha com *) e botão de confirmação
         [sg.Text('SENHA-MESTRE', size=(13, 1)),
-         sg.InputText(key='Input1', size=(30, 1), password_char='*'), sg.Button('✔')],
+         sg.InputText(key='-INPUT-', size=(18, 1), password_char='*'), sg.Button('✔')],
         # Texto com dados da empresa e versão do software
         [sg.Text('')],
-        [sg.Text('© 2023 Picoword'), sg.Text('info@picoword.com', size=(31, 1), justification='right')],
+        # Texto com o copyright no ano atual sempre
+        [sg.Text(f'© {datetime.now().year} Picoword'), sg.Push(), sg.Text(f'↻ {github_user}')],
     ]
 
     # cria a janela
-    janela = sg.Window('PICOWORD v0.0.1 - Login', layout, finalize=True)
-    janela['Input1'].bind('<Return>', '-ENTER-')
+    janela = sg.Window(f'PICOWORD v{versao_app} - Login', layout, finalize=True)
+    janela['-INPUT-'].bind('<Return>', '-ENTER-')
 
     # Loop para manter a janela aberta
     while True:
@@ -395,14 +418,14 @@ def janela_de_login():
         if eventos == sg.WINDOW_CLOSED or eventos == 'Sair':
             break
         # caso aperte enter na caixa de escrita ou clique no botão ✔
-        elif eventos == 'Input1' + '-ENTER-' or eventos == '✔':
-            if verifica_senha_mestre(valores['Input1']):
+        elif eventos == '-INPUT-' + '-ENTER-' or eventos == '✔':
+            if verifica_senha_mestre(valores['-INPUT-']):
                 janela.close()
                 janela_principal()
 
             else:
-                sg.popup('Senha incorreta!', title='PICOWORD')
-                break
+                valores['-INPUT-'] = ''
+                janela['-INPUT-'].update('')
 
     # Fecha a janela
     janela.close()
@@ -412,6 +435,5 @@ janela_de_login()
 
 
 # Notas do desenvolvedor:
-# A função de modificação e salvamento de dados está quebrada, precisa ser concertado ambos.
-# A a função de busca ainda não foi implementada
-# clique duplo na ListBox não funciona 100%
+# O salvamento de dados quando modifica uma senha não funciona 100% do jeito que eu queria que funcionasse, mas funciona.
+# Explicando melhor, ele salva dos dados e colocando-os no final do arquivo, ao invés de substituir a linha antiga.
