@@ -14,10 +14,25 @@ github_user = 'MatPicolli'
 
 
 def verifica_senha_mestre(senha_escrita):
-    if senha_escrita == 'mateus124':
-        return True
-    else:
-        return False
+
+    with open('senha_mestre.key', 'r', encoding='utf-8') as f:
+
+        aux = f.read()
+        
+        # transforma cada caracter da senha escrita em um inteiro
+        # divide por 3
+        # transforma cada inteiro em um caracter
+
+        aux = ''.join([chr(ord(c) // 3) for c in aux])
+        
+        print(aux)
+
+        f.close()
+
+        if senha_escrita == aux:
+            return True
+        else:
+            return False
 
 
 def verifica_indice(indice):
@@ -176,7 +191,7 @@ def modifica_senha(index, buscando=False):
         [sg.Text('Senha', size=(8, 1)), sg.InputText(lista[index][2], size=(25, 1), key='-PASS-')],
         [sg.Text('E-mail', size=(8, 1)), sg.InputText(lista[index][3], size=(25, 1), key='-EMAIL-')],
         [sg.Text('Adicional', size=(8, 1)), sg.Multiline(lista[index][4], size=(25, 8), key='-ADD-')],
-        [sg.Button('Salvar', button_color=('white', 'green'), size=(13, 1), key='-SALVAR-'),
+        [sg.Button('Salvar', button_color=('white', 'green'), size=(13, 1), key='-SALVAR-'), sg.Push(), 
          sg.Button('Deletar', button_color=('white', 'red'), size=(12, 1), key='-DELETAR-')]
     ]
 
@@ -259,138 +274,194 @@ def adiciona_senha():
 
 def janela_principal():
     
-    #fh.decrypt_file()
+    try:
+        #fh.decrypt_file()
 
-    # chama a variavel global de lista
-    global lista, lista_busca, lista_para_mostrar, lista_para_buscar
+        # chama a variavel global de lista
+        global lista, lista_busca, lista_para_mostrar, lista_para_buscar
 
-    # verifica se o arquivo senhas.txt existe
-    if not os.path.exists('senhas.csv'):
-        # caso não exista cria o arquivo
-        with open('senhas.csv', 'w') as f:
+        # verifica se o arquivo senhas.txt existe
+        if not os.path.exists('senhas.csv'):
+            # caso não exista cria o arquivo
+            with open('senhas.csv', 'w') as f:
+                f.close()
+
+        # lista recebe dados de senhas.csv
+        atualiza_lista()
+
+        # tema e fonte
+        sg.theme(tema_geral)
+        sg.set_options(font=('Roboto', 11))
+
+        layout = [
+            # cria um caixa de texto e um botão de busca
+            [sg.Text('Buscar'), sg.InputText(size=(29, 1), key='-BUSCA-'), sg.Button('🔍')],
+            [sg.Listbox(lista_para_mostrar, size=(40, 20), key='-LISTBOX-', enable_events=True, select_mode=sg.LISTBOX_SELECT_MODE_SINGLE)],
+            [sg.Button('➕', size=(18, 1), key='-ADICIONAR-'), sg.Button('✏️', size=(17, 1), key='-MODIFICAR-')],
+            [sg.Text(f'© {datetime.now().year} Picoword'), sg.Push(), sg.Text(f'↻ {github_user}')],
+        ]
+
+        # cria a janela
+        janela = sg.Window(f'PICOWORD v{versao_app} - Tela Principal', layout, finalize=True)
+        janela['-LISTBOX-'].bind('<Double-Button-1>', '-DOUBLE-')
+        janela['-BUSCA-'].bind('<Return>', '-ENTER-')
+
+        # enquanto o usuário não fechar a janela
+        na_busca = False
+        primeiro_update = False
+        while True:
+            # recebe os valores da tela
+            eventos, valores = janela.read()
+
+            if not primeiro_update:
+                janela['-LISTBOX-'].update(lista_para_mostrar)
+                primeiro_update = True
+
+            # caso o usuario clique em adicionar
+            elif eventos == '-ADICIONAR-':
+                try:
+                    # adiciona a senha
+                    adiciona_senha()
+                    # atualiza lista
+                    atualiza_lista()
+                    # atualiza a Listbox com apenas a primeira coluna da lista
+                    janela['-LISTBOX-'].update(lista_para_mostrar)
+                except ValueError:
+                    pass
+
+            # se o usuário fechar a janela
+            elif eventos == sg.WINDOW_CLOSED:
+                break
+
+            elif eventos == '-MODIFICAR-':
+                if valores['-LISTBOX-']:
+                    try:
+                        if na_busca:
+                            # pega o nome completo do item selecionado
+                            index_selecionado = valores['-LISTBOX-'][0]
+                            # pega apenas os 4 primeiros caracteres do nome completo, que é o código do cliente
+                            modifica_senha(index_selecionado, True)
+
+                            atualiza_lista()
+
+                            busca = valores['-BUSCA-']
+
+                            lista_busca = list(filter(lambda cadastro: busca.lower() in cadastro[1].lower(), lista))
+
+                            # atualiza a lista_busca
+                            atualiza_lista_busca()
+                            # atualiza a Listbox com a lista filtrada
+                            janela['-LISTBOX-'].update(lista_para_buscar)
+                            na_busca = True
+                        else:
+                            # pega o index do item selecionado
+                            index_selecionado = lista_para_mostrar.index(valores['-LISTBOX-'][0])
+                            # modifica senha
+                            modifica_senha(index_selecionado)
+                            # atualiza lista
+                            atualiza_lista()
+                            # atualiza a Listbox
+                            janela['-LISTBOX-'].update(lista_para_mostrar)
+                    except ValueError:
+                        pass
+
+            # caso o usuário selecione um item da lista e dê clique duplo nele
+            elif eventos == '-LISTBOX-' + '-DOUBLE-':
+                if valores['-LISTBOX-']:
+                    try:
+                        print('entrou 1')
+                        print(na_busca)
+                        if na_busca:
+                            # pega o index do item selecionado
+                            index_selecionado = lista_para_buscar.index(valores['-LISTBOX-'][0])
+                            print('entrou 2')
+                            visualiza_senha_busca(index_selecionado)
+                        else:
+                            # pega o index do item selecionado
+                            index_selecionado = lista_para_mostrar.index(valores['-LISTBOX-'][0])
+                            visualisa_senha(index_selecionado)
+                    except ValueError:
+                        pass
+
+            elif eventos == '🔍' or eventos == '-BUSCA-' + '-ENTER-':
+                if valores['-BUSCA-'] == '':
+                    # atualiza lista
+                    atualiza_lista()
+                    # atualiza a Listbox
+                    janela['-LISTBOX-'].update(lista_para_mostrar)
+                    na_busca = False
+                else:
+                    busca = valores['-BUSCA-']
+                    # filtra a lista de senhas com base no texto de busca
+                    lista_busca = [senha for senha in lista if busca.lower() in senha[0].lower()]
+                    # atualiza a lista_busca
+                    atualiza_lista_busca()
+                    # atualiza a Listbox com a lista filtrada
+                    janela['-LISTBOX-'].update(lista_para_buscar)
+                    na_busca = True
+
+        #fh.encrypt_file()
+
+        # fecha a janela
+        janela.close()
+    
+    except:
+        print(end='')
+
+
+def nova_senha_mestre():
+    # verifica se existe o arquivo chamado senha_mestre.key
+    if not os.path.exists('senha_mestre.key'):
+        with open('senha_mestre.key', 'w', encoding='utf-8') as f:
+
+            sg.theme(tema_geral)
+            sg.set_options(font=('Roboto', 11))
+
+            # layot da janela
+            layout = [
+                [sg.Text('Nova senha', size=(15, 1)),
+                 sg.InputText(key='-NEWPASS1-', size=(18, 1))],
+                [sg.Text('Confirmar senha', size=(15, 1)),
+                 sg.InputText(key='-NEWPASS2-', size=(18, 1))],
+                [sg.Button('CONFIRMAR', size=(13, 1), button_color=('green'))]
+            ]
+
+            janela = sg.Window(f'Nova Senha_Mestre', layout, finalize=True)
+
+            while True:
+                eventos, valores = janela.read()
+
+                if eventos == sg.WINDOW_CLOSED or eventos == 'Sair':
+                    break
+
+                if eventos == 'CONFIRMAR':
+                    if valores['-NEWPASS1-'] == valores['-NEWPASS2-']:
+                        # grava a nova senha mestre
+                        aux = valores['-NEWPASS1-']
+                        print(aux)
+
+                        # transforma cada caracter na senha em inteiro
+                        # multiplica o intero por 3
+                        # converte o interiro para caracter novamente
+                        aux = ''.join([chr(ord(c) * 3) for c in aux])
+                        print(aux)
+
+                        f.write(aux)
+
+                        janela.close()
+                        break
+                    else:
+                        pass
+            janela.close()
             f.close()
-
-    # lista recebe dados de senhas.csv
-    atualiza_lista()
-
-    # tema e fonte
-    sg.theme(tema_geral)
-    sg.set_options(font=('Roboto', 11))
-
-    layout = [
-        # cria um caixa de texto e um botão de busca
-        [sg.Text('Buscar'), sg.InputText(size=(29, 1), key='-BUSCA-'), sg.Button('🔍')],
-        [sg.Listbox(lista_para_mostrar, size=(40, 20), key='-LISTBOX-', enable_events=True, select_mode=sg.LISTBOX_SELECT_MODE_SINGLE)],
-        [sg.Button('➕', size=(18, 1), key='-ADICIONAR-'), sg.Button('✏️', size=(17, 1), key='-MODIFICAR-')],
-        [sg.Text(f'© {datetime.now().year} Picoword'), sg.Push(), sg.Text(f'↻ {github_user}')],
-    ]
-
-    # cria a janela
-    janela = sg.Window(f'PICOWORD v{versao_app} - Tela Principal', layout, finalize=True)
-    janela['-LISTBOX-'].bind('<Double-Button-1>', '-DOUBLE-')
-    janela['-BUSCA-'].bind('<Return>', '-ENTER-')
-
-    # enquanto o usuário não fechar a janela
-    na_busca = False
-    primeiro_update = False
-    while True:
-        # recebe os valores da tela
-        eventos, valores = janela.read()
-
-        if not primeiro_update:
-            janela['-LISTBOX-'].update(lista_para_mostrar)
-            primeiro_update = True
-
-        # caso o usuario clique em adicionar
-        elif eventos == '-ADICIONAR-':
-            try:
-                # adiciona a senha
-                adiciona_senha()
-                # atualiza lista
-                atualiza_lista()
-                # atualiza a Listbox com apenas a primeira coluna da lista
-                janela['-LISTBOX-'].update(lista_para_mostrar)
-            except ValueError:
-                pass
-
-        # se o usuário fechar a janela
-        elif eventos == sg.WINDOW_CLOSED:
-            break
-
-        elif eventos == '-MODIFICAR-':
-            if valores['-LISTBOX-']:
-                try:
-                    if na_busca:
-                        # pega o nome completo do item selecionado
-                        index_selecionado = valores['-LISTBOX-'][0]
-                        # pega apenas os 4 primeiros caracteres do nome completo, que é o código do cliente
-                        modifica_senha(index_selecionado, True)
-
-                        atualiza_lista()
-
-                        busca = valores['-BUSCA-']
-
-                        lista_busca = list(filter(lambda cadastro: busca.lower() in cadastro[1].lower(), lista))
-
-                        # atualiza a lista_busca
-                        atualiza_lista_busca()
-                        # atualiza a Listbox com a lista filtrada
-                        janela['-LISTBOX-'].update(lista_para_buscar)
-                        na_busca = True
-                    else:
-                        # pega o index do item selecionado
-                        index_selecionado = lista_para_mostrar.index(valores['-LISTBOX-'][0])
-                        # modifica senha
-                        modifica_senha(index_selecionado)
-                        # atualiza lista
-                        atualiza_lista()
-                        # atualiza a Listbox
-                        janela['-LISTBOX-'].update(lista_para_mostrar)
-                except ValueError:
-                    pass
-
-        # caso o usuário selecione um item da lista e dê clique duplo nele
-        elif eventos == '-LISTBOX-' + '-DOUBLE-':
-            if valores['-LISTBOX-']:
-                try:
-                    print('entrou 1')
-                    print(na_busca)
-                    if na_busca:
-                        # pega o index do item selecionado
-                        index_selecionado = lista_para_buscar.index(valores['-LISTBOX-'][0])
-                        print('entrou 2')
-                        visualiza_senha_busca(index_selecionado)
-                    else:
-                        # pega o index do item selecionado
-                        index_selecionado = lista_para_mostrar.index(valores['-LISTBOX-'][0])
-                        visualisa_senha(index_selecionado)
-                except ValueError:
-                    pass
-
-        elif eventos == '🔍' or eventos == '-BUSCA-' + '-ENTER-':
-            if valores['-BUSCA-'] == '':
-                # atualiza lista
-                atualiza_lista()
-                # atualiza a Listbox
-                janela['-LISTBOX-'].update(lista_para_mostrar)
-                na_busca = False
-            else:
-                busca = valores['-BUSCA-']
-                # filtra a lista de senhas com base no texto de busca
-                lista_busca = [senha for senha in lista if busca.lower() in senha[0].lower()]
-                # atualiza a lista_busca
-                atualiza_lista_busca()
-                # atualiza a Listbox com a lista filtrada
-                janela['-LISTBOX-'].update(lista_para_buscar)
-                na_busca = True
-
-    #fh.encrypt_file()
-
-    # fecha a janela
-    janela.close()
+            return
+    else:
+        return
 
 
 def janela_de_login():
+
+    nova_senha_mestre()
     # Tema e cor de fundo da janela
     sg.theme(tema_geral)
     sg.set_options(font=('Roboto', 11))
