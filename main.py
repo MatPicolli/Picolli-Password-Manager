@@ -116,38 +116,22 @@ def confirma_acao():
     janela.close()
 
 
-def visualiza_senha_busca(index):
+def visualisa_senha(index, buscando=False):
+    
+    print('visualizando senha...')
+    print('indice:', index)
+    
     # tema e fonte
     sg.theme(tema_geral)
     sg.set_options(font=('Roboto', 11))
 
-    # layout da janela
-    layout = [
-        [sg.Text('Index *', size=(8, 1)), sg.InputText(lista_busca[index][0], disabled=True, size=(20, 1), key='-INDEX-')],
-        [sg.Text('Usuário', size=(8, 1)), sg.InputText(lista_busca[index][1], disabled=True, size=(20, 1), key='-USER-')],
-        [sg.Text('Senha', size=(8, 1)), sg.InputText(lista_busca[index][2], disabled=True, size=(20, 1), key='-PASS-')],
-        [sg.Text('E-mail', size=(8, 1)), sg.InputText(lista_busca[index][3], disabled=True, size=(20, 1), key='-EMAIL-')],
-        [sg.Text('Adicional', size=(8, 1)), sg.Multiline(lista_busca[index][4], disabled=True, size=(25, 8), key='-ADD-')],
-    ]
+    if buscando:
+        for linha in range(0, len(lista)):
+            for coluna in range(0, len(lista)):
+                if str(index) == lista[linha][0]:
+                    index = linha
 
-    # cria janela
-    janela = sg.Window('Visualização', layout, keep_on_top=True)
-
-    # loop para receber os valores da janela
-    while True:
-        # caso clique no X na janela
-        eventos, valores = janela.read()
-        if eventos == sg.WINDOW_CLOSED:
-            break
-
-    # fecha a janela
-    janela.close()
-
-
-def visualisa_senha(index):
-    # tema e fonte
-    sg.theme(tema_geral)
-    sg.set_options(font=('Roboto', 11))
+    print('indice:', index)
 
     # layout da janela
     layout = [
@@ -181,7 +165,6 @@ def modifica_senha(index, buscando=False):
         for linha in range(0, len(lista)):
             for coluna in range(0, len(lista)):
                 if str(index) == lista[linha][0]:
-                    index = linha
                     index = linha
 
     # layout da janela
@@ -337,31 +320,19 @@ def janela_principal():
                 if valores['-LISTBOX-']:
                     try:
                         if na_busca:
-                            # pega o nome completo do item selecionado
-                            index_selecionado = valores['-LISTBOX-'][0]
-                            # pega apenas os 4 primeiros caracteres do nome completo, que é o código do cliente
-                            modifica_senha(index_selecionado, True)
-
+                            index_selecionado = valores['-LISTBOX-'][0] # pega o nome completo do item selecionado
+                            modifica_senha(index_selecionado, True) # pega apenas os 4 primeiros caracteres do nome completo, que é o código do cliente
                             atualiza_lista()
-
                             busca = valores['-BUSCA-']
-
                             lista_busca = list(filter(lambda cadastro: busca.lower() in cadastro[1].lower(), lista))
-
-                            # atualiza a lista_busca
-                            atualiza_lista_busca()
-                            # atualiza a Listbox com a lista filtrada
-                            janela['-LISTBOX-'].update(lista_para_buscar)
+                            atualiza_lista_busca() # atualiza a lista_busca
+                            janela['-LISTBOX-'].update(lista_para_buscar) # atualiza a Listbox com a lista filtrada
                             na_busca = True
                         else:
-                            # pega o index do item selecionado
-                            index_selecionado = lista_para_mostrar.index(valores['-LISTBOX-'][0])
-                            # modifica senha
-                            modifica_senha(index_selecionado)
-                            # atualiza lista
-                            atualiza_lista()
-                            # atualiza a Listbox
-                            janela['-LISTBOX-'].update(lista_para_mostrar)
+                            index_selecionado = lista_para_mostrar.index(valores['-LISTBOX-'][0]) # pega o index do item selecionado
+                            modifica_senha(index_selecionado) # modifica senha
+                            atualiza_lista() # atualiza lista
+                            janela['-LISTBOX-'].update(lista_para_mostrar) # atualiza a Listbox
                     except ValueError:
                         pass
 
@@ -369,16 +340,13 @@ def janela_principal():
             elif eventos == '-LISTBOX-' + '-DOUBLE-':
                 if valores['-LISTBOX-']:
                     try:
-                        print('entrou 1')
-                        print(na_busca)
+                        print('event: ' + eventos)
+                        print(f'procurando: {na_busca}')
                         if na_busca:
-                            # pega o index do item selecionado
-                            index_selecionado = lista_para_buscar.index(valores['-LISTBOX-'][0])
-                            print('entrou 2')
-                            visualiza_senha_busca(index_selecionado)
+                            index_selecionado = valores['-LISTBOX-'][0] # pega o index do item selecionado
+                            visualisa_senha(index_selecionado, True)
                         else:
-                            # pega o index do item selecionado
-                            index_selecionado = lista_para_mostrar.index(valores['-LISTBOX-'][0])
+                            index_selecionado = lista_para_mostrar.index(valores['-LISTBOX-'][0]) # pega o index do item selecionado
                             visualisa_senha(index_selecionado)
                     except ValueError:
                         pass
@@ -502,7 +470,8 @@ def janela_de_login():
     janela.close()
 
 
-janela_de_login()
+if __name__ == '__main__':
+    janela_de_login()
 
 
 # Notas do desenvolvedor:
