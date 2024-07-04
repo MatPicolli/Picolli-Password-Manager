@@ -10,7 +10,7 @@ lista_busca = []
 lista_para_mostrar = []
 lista_para_buscar = []
 tema_geral = 'Reddit'
-versao_app = '2.0'
+versao_app = '2.3'
 github_user = 'MatPicolli'
 temas_disponiveis = ['Black', 'Black2', 'BlueMono', 'BluePurple', 'BrightColors', 'BrownBlue', 'Dark', 
                      'Dark2', 'DarkAmber', 'DarkBlack', 'DarkBlack1', 'DarkBlue', 'DarkBlue1', 'DarkBlue10', 
@@ -91,7 +91,7 @@ def atualiza_lista_busca():
     lista_para_buscar = []
     # atualiza a lista de senhas
     for linha in range(len(lista_busca)):
-        lista_para_buscar.append(f'{lista_busca[linha][0]}')
+        lista_para_buscar.append(f'  {lista_busca[linha][0]}')
 
 
 def atualiza_lista():
