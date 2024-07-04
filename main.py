@@ -158,7 +158,6 @@ def confirma_acao():
 
 
 def visualisa_senha(index, buscando=False):
-    
     print('visualizando senha...')
     print('indice:', index)
     
@@ -166,11 +165,10 @@ def visualisa_senha(index, buscando=False):
     sg.theme(tema_geral)
     sg.set_options(font=('Roboto', 11))
 
-    if buscando:
-        for linha in range(0, len(lista)):
-            for coluna in range(0, len(lista)):
-                if str(index) == lista[linha][0]:
-                    index = linha
+    index = next((i for i, item in enumerate(lista) if item[0] == index.strip()), None)
+    if index is None:
+        sg.popup_error("Senha não encontrada!")
+        return
 
     print('indice:', index)
 
@@ -202,11 +200,11 @@ def modifica_senha(index, buscando=False):
     sg.theme(tema_geral)
     sg.set_options(font=('Roboto', 11))
 
-    if buscando:
-        for linha in range(0, len(lista)):
-            for coluna in range(0, len(lista)):
-                if str(index) == lista[linha][0]:
-                    index = linha
+
+    index = next((i for i, item in enumerate(lista) if item[0] == index.strip()), None)
+    if index is None:
+        sg.popup_error("Senha não encontrada!")
+        return
 
     # layout da janela
     layout = [
@@ -346,31 +344,23 @@ def janela_principal():
             elif eventos == '-MODIFICAR-':
                 if valores['-LISTBOX-']:
                     try:
-                        if na_busca:
-                            index_selecionado = valores['-LISTBOX-'][0]
-                            modifica_senha(index_selecionado, True)
-                        else:
-                            index_selecionado = lista_para_mostrar.index(valores['-LISTBOX-'][0])
-                            modifica_senha(index_selecionado)
+                        index_selecionado = valores['-LISTBOX-'][0].strip()
+                        modifica_senha(index_selecionado, na_busca)
                         atualiza_lista()
                         busca = valores['-BUSCA-']
                         lista_busca = list(filter(lambda cadastro: busca.lower() in cadastro[1].lower(), lista))
                         atualiza_lista_busca()
                         janela['-LISTBOX-'].update(lista_para_buscar if na_busca else lista_para_mostrar)
-                    except ValueError:
-                        pass
+                    except Exception as e:
+                        sg.popup_error(f"Erro ao modificar senha: {str(e)}")
 
             elif eventos == '-LISTBOX-' + '-DOUBLE-':
                 if valores['-LISTBOX-']:
                     try:
-                        if na_busca:
-                            index_selecionado = valores['-LISTBOX-'][0]
-                            visualisa_senha(index_selecionado, True)
-                        else:
-                            index_selecionado = lista_para_mostrar.index(valores['-LISTBOX-'][0])
-                            visualisa_senha(index_selecionado)
-                    except ValueError:
-                        pass
+                        index_selecionado = valores['-LISTBOX-'][0].strip()
+                        visualisa_senha(index_selecionado, na_busca)
+                    except Exception as e:
+                        sg.popup_error(f"Erro ao visualizar senha: {str(e)}")
 
             elif eventos == '-BUSCA-':
                 busca = valores['-BUSCA-']
