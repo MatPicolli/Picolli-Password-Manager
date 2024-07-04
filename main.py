@@ -1,6 +1,7 @@
 import os
 import csv
-import PySimpleGUI as sg
+import json
+import FreeSimpleGUI as sg
 from datetime import datetime
 
 
@@ -11,6 +12,46 @@ lista_para_buscar = []
 tema_geral = 'Reddit'
 versao_app = '2.0'
 github_user = 'MatPicolli'
+temas_disponiveis = ['Black', 'Black2', 'BlueMono', 'BluePurple', 'BrightColors', 'BrownBlue', 'Dark', 
+                     'Dark2', 'DarkAmber', 'DarkBlack', 'DarkBlack1', 'DarkBlue', 'DarkBlue1', 'DarkBlue10', 
+                     'DarkBlue11', 'DarkBlue12', 'DarkBlue13', 'DarkBlue14', 'DarkBlue15', 'DarkBlue16', 'DarkBlue17', 
+                     'DarkBlue18', 'DarkBlue2', 'DarkBlue3', 'DarkBlue4', 'DarkBlue5', 'DarkBlue6', 'DarkBlue7', 'DarkBlue8', 
+                     'DarkBlue9', 'DarkBrown', 'DarkBrown1', 'DarkBrown2', 'DarkBrown3', 'DarkBrown4', 'DarkBrown5', 'DarkBrown6', 
+                     'DarkBrown7', 'DarkGreen', 'DarkGreen1', 'DarkGreen2', 'DarkGreen3', 'DarkGreen4', 'DarkGreen5', 'DarkGreen6', 
+                     'DarkGreen7', 'DarkGrey', 'DarkGrey1', 'DarkGrey10', 'DarkGrey11', 'DarkGrey12', 'DarkGrey13', 'DarkGrey14', 
+                     'DarkGrey15', 'DarkGrey16', 'DarkGrey2', 'DarkGrey3', 'DarkGrey4', 'DarkGrey5', 'DarkGrey6', 'DarkGrey7', 
+                     'DarkGrey8', 'DarkGrey9', 'DarkPurple', 'DarkPurple1', 'DarkPurple2', 'DarkPurple3', 'DarkPurple4', 'DarkPurple5', 
+                     'DarkPurple6', 'DarkPurple7', 'DarkRed', 'DarkRed1', 'DarkRed2', 'DarkTanBlue', 'DarkTeal', 'DarkTeal1', 'DarkTeal10', 
+                     'DarkTeal11', 'DarkTeal12', 'DarkTeal2', 'DarkTeal3', 'DarkTeal4', 'DarkTeal5', 'DarkTeal6', 'DarkTeal7', 'DarkTeal8', 
+                     'DarkTeal9', 'Default', 'Default1', 'DefaultNoMoreNagging', 'GrayGrayGray', 'Green', 'GreenMono', 'GreenTan', 'HotDogStand', 
+                     'Kayak', 'LightBlue', 'LightBlue1', 'LightBlue2', 'LightBlue3', 'LightBlue4', 'LightBlue5', 'LightBlue6', 'LightBlue7', 
+                     'LightBrown', 'LightBrown1', 'LightBrown10', 'LightBrown11', 'LightBrown12', 'LightBrown13', 'LightBrown2', 'LightBrown3', 
+                    'LightBrown4', 'LightBrown5', 'LightBrown6', 'LightBrown7', 'LightBrown8', 'LightBrown9', 'LightGray1', 'LightGreen', 'LightGreen1', 'LightGreen10', 
+                    'LightGreen2', 'LightGreen3', 'LightGreen4', 'LightGreen5', 'LightGreen6', 'LightGreen7', 'LightGreen8', 'LightGreen9', 'LightGrey', 'LightGrey1', 
+                    'LightGrey2', 'LightGrey3', 'LightGrey4', 'LightGrey5', 'LightGrey6', 'LightPurple', 'LightTeal', 'LightYellow', 'Material1', 'Material2', 
+                    'NeonBlue1', 'NeonGreen1', 'NeonYellow1', 'NeutralBlue', 'Purple', 'Python', 'PythonPlus', 'Reddit', 'Reds', 'SandyBeach', 'SystemDefault', 
+                    'SystemDefault1', 'SystemDefaultForReal', 'Tan', 'TanBlue', 'TealMono', 'Topanga']
+
+
+def carregar_configuracoes():
+    if os.path.exists('config.json'):
+        with open('config.json', 'r') as f:
+            return json.load(f)
+    return {"tema": "Reddit"}  # Tema padrão
+
+
+def salvar_configuracoes(config):
+    with open('config.json', 'w') as f:
+        json.dump(config, f)
+
+
+def mudar_tema(novo_tema):
+    global tema_geral
+    tema_geral = novo_tema
+    sg.theme(tema_geral)
+    config = carregar_configuracoes()
+    config['tema'] = tema_geral
+    salvar_configuracoes(config)
 
 
 def verifica_senha_mestre(senha_escrita):
@@ -256,63 +297,49 @@ def adiciona_senha():
 
 
 def janela_principal():
-    
     try:
-        #fh.decrypt_file()
+        global lista, lista_busca, lista_para_mostrar, lista_para_buscar, tema_geral
 
-        # chama a variavel global de lista
-        global lista, lista_busca, lista_para_mostrar, lista_para_buscar
-
-        # verifica se o arquivo senhas.txt existe
         if not os.path.exists('senhas.csv'):
-            # caso não exista cria o arquivo
             with open('senhas.csv', 'w') as f:
                 f.close()
 
-        # lista recebe dados de senhas.csv
         atualiza_lista()
 
-        # tema e fonte
+        # Carrega as configurações salvas
+        config = carregar_configuracoes()
+        tema_geral = config['tema']
         sg.theme(tema_geral)
         sg.set_options(font=('Roboto', 11))
 
         layout = [
-            # cria um caixa de texto e um botão de busca
-            [sg.Text('Buscar'), sg.InputText(size=(29, 1), key='-BUSCA-'), sg.Button('🔍')],
+            [sg.Text('Buscar'), sg.InputText(size=(29, 1), key='-BUSCA-', enable_events=True)],
             [sg.Listbox(lista_para_mostrar, size=(40, 20), key='-LISTBOX-', enable_events=True, select_mode=sg.LISTBOX_SELECT_MODE_SINGLE)],
             [sg.Button('➕', size=(18, 1), key='-ADICIONAR-'), sg.Button('✏️', size=(17, 1), key='-MODIFICAR-')],
+            [sg.Text('Tema:'), sg.Combo(temas_disponiveis, default_value=tema_geral, key='-TEMA-', enable_events=True, size=(15, 1))],
             [sg.Text(f'© {datetime.now().year} Picoword'), sg.Push(), sg.Text(f'↻ {github_user}')],
         ]
 
-        # cria a janela
         janela = sg.Window(f'PICOWORD v{versao_app} - Tela Principal', layout, finalize=True)
         janela['-LISTBOX-'].bind('<Double-Button-1>', '-DOUBLE-')
-        janela['-BUSCA-'].bind('<Return>', '-ENTER-')
 
-        # enquanto o usuário não fechar a janela
         na_busca = False
         primeiro_update = False
         while True:
-            # recebe os valores da tela
             eventos, valores = janela.read()
 
             if not primeiro_update:
                 janela['-LISTBOX-'].update(lista_para_mostrar)
                 primeiro_update = True
 
-            # caso o usuario clique em adicionar
             elif eventos == '-ADICIONAR-':
                 try:
-                    # adiciona a senha
                     adiciona_senha()
-                    # atualiza lista
                     atualiza_lista()
-                    # atualiza a Listbox com apenas a primeira coluna da lista
                     janela['-LISTBOX-'].update(lista_para_mostrar)
                 except ValueError:
                     pass
 
-            # se o usuário fechar a janela
             elif eventos == sg.WINDOW_CLOSED:
                 break
 
@@ -320,61 +347,54 @@ def janela_principal():
                 if valores['-LISTBOX-']:
                     try:
                         if na_busca:
-                            index_selecionado = valores['-LISTBOX-'][0] # pega o nome completo do item selecionado
-                            modifica_senha(index_selecionado, True) # pega apenas os 4 primeiros caracteres do nome completo, que é o código do cliente
-                            atualiza_lista()
-                            busca = valores['-BUSCA-']
-                            lista_busca = list(filter(lambda cadastro: busca.lower() in cadastro[1].lower(), lista))
-                            atualiza_lista_busca() # atualiza a lista_busca
-                            janela['-LISTBOX-'].update(lista_para_buscar) # atualiza a Listbox com a lista filtrada
-                            na_busca = True
+                            index_selecionado = valores['-LISTBOX-'][0]
+                            modifica_senha(index_selecionado, True)
                         else:
-                            index_selecionado = lista_para_mostrar.index(valores['-LISTBOX-'][0]) # pega o index do item selecionado
-                            modifica_senha(index_selecionado) # modifica senha
-                            atualiza_lista() # atualiza lista
-                            janela['-LISTBOX-'].update(lista_para_mostrar) # atualiza a Listbox
+                            index_selecionado = lista_para_mostrar.index(valores['-LISTBOX-'][0])
+                            modifica_senha(index_selecionado)
+                        atualiza_lista()
+                        busca = valores['-BUSCA-']
+                        lista_busca = list(filter(lambda cadastro: busca.lower() in cadastro[1].lower(), lista))
+                        atualiza_lista_busca()
+                        janela['-LISTBOX-'].update(lista_para_buscar if na_busca else lista_para_mostrar)
                     except ValueError:
                         pass
 
-            # caso o usuário selecione um item da lista e dê clique duplo nele
             elif eventos == '-LISTBOX-' + '-DOUBLE-':
                 if valores['-LISTBOX-']:
                     try:
-                        print('event: ' + eventos)
-                        print(f'procurando: {na_busca}')
                         if na_busca:
-                            index_selecionado = valores['-LISTBOX-'][0] # pega o index do item selecionado
+                            index_selecionado = valores['-LISTBOX-'][0]
                             visualisa_senha(index_selecionado, True)
                         else:
-                            index_selecionado = lista_para_mostrar.index(valores['-LISTBOX-'][0]) # pega o index do item selecionado
+                            index_selecionado = lista_para_mostrar.index(valores['-LISTBOX-'][0])
                             visualisa_senha(index_selecionado)
                     except ValueError:
                         pass
 
-            elif eventos == '🔍' or eventos == '-BUSCA-' + '-ENTER-':
-                if valores['-BUSCA-'] == '':
-                    # atualiza lista
+            elif eventos == '-BUSCA-':
+                busca = valores['-BUSCA-']
+                if busca == '':
                     atualiza_lista()
-                    # atualiza a Listbox
                     janela['-LISTBOX-'].update(lista_para_mostrar)
                     na_busca = False
                 else:
-                    busca = valores['-BUSCA-']
-                    # filtra a lista de senhas com base no texto de busca
                     lista_busca = [senha for senha in lista if busca.lower() in senha[0].lower()]
-                    # atualiza a lista_busca
                     atualiza_lista_busca()
-                    # atualiza a Listbox com a lista filtrada
                     janela['-LISTBOX-'].update(lista_para_buscar)
                     na_busca = True
 
-        #fh.encrypt_file()
+            elif eventos == '-TEMA-':
+                novo_tema = valores['-TEMA-']
+                mudar_tema(novo_tema)
+                # Recria a janela com o novo tema
+                janela.close()
+                return janela_principal()  # Reinicia a janela principal com o novo tema
 
-        # fecha a janela
         janela.close()
     
-    except:
-        print(end='')
+    except Exception as e:
+        print(f"Ocorreu um erro: {e}")
 
 
 def nova_senha_mestre():
@@ -428,9 +448,13 @@ def nova_senha_mestre():
 
 
 def janela_de_login():
-
+    global tema_geral
     nova_senha_mestre()
-    # Tema e cor de fundo da janela
+    
+    # Carrega as configurações salvas
+    config = carregar_configuracoes()
+    tema_geral = config['tema']
+    
     sg.theme(tema_geral)
     sg.set_options(font=('Roboto', 11))
 
