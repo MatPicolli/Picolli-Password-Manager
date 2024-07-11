@@ -15,7 +15,7 @@ PicoWord is a simple password manager built with Python and FreeSimpleGUI. It al
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/MatPicolli/PicoWord.git
+   git clone https://github.com/MatPicolli/Picolli-Password-Manager.git
    cd PicoWord
 
 ## Acknowledgments
