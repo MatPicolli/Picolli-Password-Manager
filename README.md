@@ -1,25 +1,24 @@
-# PicoWord Password Manager
+# PicoWord
 
-PicoWord is a simple password manager built with Python and FreeSimpleGUI. It allows users to store, view, and manage their passwords securely.
+Password manager with AES encryption, built with Python and CustomTkinter.
 
 ## Features
 
-- **Password Storage:** Save and manage your passwords in a CSV file.
-- **Master Password:** Protect your password list with a master password.
-- **Search Functionality:** Search for specific passwords within the application.
-- **Theme Customization:** Change the theme of the application.
-- **Password Modification:** Modify existing passwords.
-- **Password Deletion:** Delete passwords securely.
+- Master password with PBKDF2-SHA256 hashing
+- AES (Fernet) encryption for stored passwords
+- CSV import with duplicate detection
+- Automatic migration from legacy plain-text format
+- Minimal dark UI
 
-## Installation
+## Setup
 
-1. **Clone the Repository:**
-   ```bash
-   git clone https://github.com/MatPicolli/Picolli-Password-Manager.git
-   cd PicoWord
-
-## Acknowledgments
-Developed by MatPicolli
+```bash
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python main.py
+```
 
 ## License
-This project is licensed under the MIT License.
+
+MIT - Developed by [MatPicolli](https://github.com/MatPicolli)
